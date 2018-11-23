@@ -31,6 +31,8 @@ private:
     void computeDescriptors();
     void featureMatching();
     void updateStates();
+    void readConfigFile();
+    void poseEstimation();
 
     enum VOState
     {
@@ -50,11 +52,13 @@ private:
     cv::Mat descriptors_curr_;
     cv::Mat descriptors_ref_;
     std::vector<cv::DMatch> feature_matches_;
+    cv::Mat cam_intrinsic_;
 
     int num_of_features_;
     double scale_factor_;
     int level_pyramid_;
     double match_ratio_;
+    std::string config_file_name_;
 };
 }
 
