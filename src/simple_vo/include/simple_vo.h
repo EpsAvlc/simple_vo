@@ -30,6 +30,7 @@ private:
     void extractKeyPoints();
     void computeDescriptors();
     void featureMatching();
+    void updateStates();
 
     enum VOState
     {

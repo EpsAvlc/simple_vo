@@ -58,6 +58,7 @@ void SimpleVO::addFrame(const cv_bridge::CvImageConstPtr img_ptr)
         extractKeyPoints();
         // compute the 3d position of features in ref frame
         computeDescriptors();
+        updateStates();
         break;
     }
     case OK:
@@ -66,6 +67,7 @@ void SimpleVO::addFrame(const cv_bridge::CvImageConstPtr img_ptr)
         extractKeyPoints();
         computeDescriptors();
         featureMatching();
+        updateStates();
         break;
     }
     case LOST:
@@ -82,8 +84,6 @@ void SimpleVO::extractKeyPoints()
 
 void SimpleVO::computeDescriptors()
 {
-    descriptors_ref_ = descriptors_curr_.clone();
-    key_points_ref_.swap(key_points_curr_);
     orb_->compute(curr_->image, key_points_curr_, descriptors_curr_);
 }
 
@@ -95,17 +95,6 @@ void SimpleVO::featureMatching()
     matcher.match (descriptors_ref_, descriptors_curr_, matches);
     ROS_ASSERT(matches.size() > 0);
 
-    cout << std::min_element (
-                        matches.begin(), matches.end(),
-                        [] ( const cv::DMatch& m1, const cv::DMatch& m2 )
-    {
-        return m1.distance < m2.distance;
-    } )->distance << endl;
-
-    // TODO:Some bug comes here.
-    cout << "I ENTERED" << endl;
-    Mat match_res;
-
     // select the best matches
     float min_dis = std::min_element (
                         matches.begin(), matches.end(),
@@ -114,17 +103,21 @@ void SimpleVO::featureMatching()
         return m1.distance < m2.distance;
     } )->distance;
 
+    cout << "MIN_DIS: " << min_dis << endl;
+
     feature_matches_.clear();
     for ( cv::DMatch& m : matches )
     {
-        if (m.distance < max<float>(min_dis * match_ratio_, 30.0))
+        if (m.distance < max<float>(min_dis * match_ratio_, 15.0))
         {
             feature_matches_.push_back(m);
         }
     }
+}
 
-    drawMatches(ref_->image, key_points_ref_, 
-        curr_->image, key_points_curr_, feature_matches_, match_res);
-    imshow("res", match_res);
-    waitKey(0);
+void SimpleVO::updateStates()
+{
+    ref_ = curr_;
+    key_points_ref_.swap(key_points_curr_);
+    descriptors_ref_ = descriptors_curr_.clone();
 }
