@@ -54,3 +54,4 @@ CATKIN_IGNORE
 .vscode
 
 src/simple_vo/bags/
+src/image2rosbag_KITTIodometry

@@ -28,11 +28,11 @@ private:
     void callback(const sensor_msgs::ImageConstPtr img_ptr);
     void addFrame(const cv_bridge::CvImageConstPtr img_ptr);
     void extractKeyPoints();
-    void computeDescriptors();
-    void featureMatching();
+    void featureTracking();
     void updateStates();
     void readConfigFile();
     void poseEstimation();
+    void drawTrace();
 
     enum VOState
     {
@@ -46,15 +46,15 @@ private:
     ros::Subscriber img_sub_;
 
     cv_bridge::CvImageConstPtr curr_, ref_;
-    cv::Ptr<cv::ORB> orb_;
-    std::vector<cv::KeyPoint> key_points_curr_;
-    std::vector<cv::KeyPoint> key_points_ref_;
-    cv::Mat descriptors_curr_;
-    cv::Mat descriptors_ref_;
-    std::vector<cv::DMatch> feature_matches_;
+    std::vector<cv::Point2f> points_curr_;
+    std::vector<cv::Point2f> points_ref_;
+    std::vector<double> disparities_;
     cv::Mat cam_intrinsic_;
+    cv::Mat odometry_R;
+    cv::Mat odometry_t;
+    cv::Mat traj_;
 
-    int num_of_features_;
+    int fast_threshold_;
     double scale_factor_;
     int level_pyramid_;
     double match_ratio_;
